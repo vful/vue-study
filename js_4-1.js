@@ -1,9 +1,9 @@
 new Vue({
 	el: "#app",
 	data: {
-		status :'init',
-		title: "ようこそ",
-		message: "以下のボタンをクリック",
+		status :'',
+		title: '',
+		message: '',
 		quizzes: [],
 		correct: null,
 		current: null,
@@ -11,12 +11,13 @@ new Vue({
 		genre: '',
 		choices: [],  
 	},
+	created: function(){
+		this.status = 'init'
+	},
 	methods: {
 		getQuiz: function(){
 			// 取得中の表示に切り替え
 			this.status = "load"
-			this.title = "取得中"
-			this.message = "少々お待ちください"
 			
 			// fetchを用いたJSONデータの取得
 			// 参考：https://blog.capilano-fw.com/?p=6646
@@ -49,45 +50,25 @@ new Vue({
 						this.quizzes.push(quizzes);
 					}
 					// ステータスを変更しクイズを表示
-					this.status = 'question'
 					this.current = 0
 					this.correct = 0
-
-					// クイズを表示
-					this.showQuiz();
+					this.status = 'question'
 				})
 				.catch(error => { // エラー処理
 					// console.log(error);
-					this.title = 'エラー'
-					this.message = 'クイズの取得に失敗しました。'
+					this.status = 'error'
 				});
-		},
-		showQuiz: function(){
-			this.title = `問題${this.current+1}`
-			this.level =  this.quizzes[this.current].level
-			this.genre =  this.quizzes[this.current].genre
-			this.message =  this.quizzes[this.current].question
-			this.choices = this.quizzes[this.current].choices
 		},
 		selectChoice: function(val){
 			if(this.quizzes[this.current].choices[val].correct) this.correct ++;
+			// クイズ配列の長さ以下の場合はincrement
 			if(this.current < (this.quizzes.length - 1)){
 				this.current ++;
-				this.showQuiz()
 			}
+			// それ以外の場合は結果表示
 			else{
-				this.showResults()
+				this.status = 'result'
 			}
-		},
-		showResults: function(){
-			this.status = 'result'
-			this.title = `あなたの正答数は${this.correct}です！！`
-			this.message = '再度チャレンジしたい場合は以下をクリック！！'
-		},
-		setInit: function(){
-			this.status ='init'
-			this.title= "ようこそ"
-			this.message= "以下のボタンをクリック"
 		},
 		shuffle: function(array) {
 			for (let i = array.length - 1; i >= 0; i--) {
@@ -96,5 +77,34 @@ new Vue({
 			}
 			return array;
 		}
-	}
+	},
+	watch: {
+		current: function (value) { // 問題番号更新
+			this.title = `問題${value+1}`
+			this.level =  this.quizzes[value].level
+			this.genre =  this.quizzes[value].genre
+			this.message =  this.quizzes[value].question
+			this.choices = this.quizzes[value].choices
+		},
+		status: function (value) { // ステータス更新
+			switch(value){
+				case 'init':
+					this.title= "ようこそ"
+					this.message= "以下のボタンをクリック"
+					break;
+				case 'load':
+					this.title = "取得中"
+					this.message = "少々お待ちください"
+					break;
+				case'result':
+					this.title = `あなたの正答数は${this.correct}です！！`
+					this.message = '再度チャレンジしたい場合は以下をクリック！！'
+					break;
+				case 'error':
+					this.title = 'エラー'
+					this.message = 'クイズの取得に失敗しました。'
+					break;
+			}
+		},
+	  },
   })

@@ -15,13 +15,13 @@
         <hr>
         <p v-html="message"></p>
         <hr>
-        <button v-if="status === 'init'" @click="getQuiz" >開始</button>
+        <button v-if="status === 'init'" v-on:click.once="getQuiz" >開始</button>
         <ul v-if="status === 'question'" style="list-style: none;">
             <li v-for="(choice, index) in choices" :key="choices.message">
                 <button @click="selectChoice(index)" v-html="choice.text"></button>
             </li>
         </ul>
-        <button v-if="status === 'result'" @click="setInit" >ホームに戻る</button>
+        <button v-if="status === 'result'" v-on:click="status = 'init'" >ホームに戻る</button>
       </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
     <script src="js_4-1.js"></script>
